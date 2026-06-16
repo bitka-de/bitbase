@@ -9,7 +9,7 @@
     <meta name="robots" content="noindex,nofollow">
     <link rel="canonical" href="@yield('canonical_url', url()->current())">
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/admin.css', 'resources/js/app.js'])
 </head>
 <body class="admin-body">
     <div class="admin-app">

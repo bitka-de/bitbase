@@ -1,0 +1,9 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@import './partials/foundation.css';
+@import './partials/components.css';
+@import './partials/data-display.css';
+@import './partials/responsive.css';

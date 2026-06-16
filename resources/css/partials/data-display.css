@@ -1,0 +1,31 @@
+/* 08. Data Display (Tables) */
+.table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: #fff;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 640px;
+}
+
+.table th,
+.table td {
+    text-align: left;
+    padding: 0.72rem 0.85rem;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.9rem;
+}
+
+.table th {
+    font-weight: 700;
+    color: var(--ink);
+    background: #fbf8f1;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}

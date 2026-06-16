@@ -1,0 +1,198 @@
+/* 05. Shared Utilities */
+.muted {
+    color: var(--muted);
+}
+
+.soft-link {
+    color: var(--link-color);
+    border-bottom: 1px solid transparent;
+    transition: border-color 180ms ease, color 180ms ease;
+}
+
+.soft-link:hover {
+    color: var(--link-hover-color);
+    border-bottom-color: var(--link-hover-border);
+}
+
+.accent-badge {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    width: max-content;
+    max-width: max-content;
+    white-space: nowrap;
+    gap: 0.4rem;
+    border-radius: 9999px;
+    background: var(--accent-soft);
+    color: #6f4d2a;
+    padding: 0.35rem 0.8rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+    font-weight: 600;
+}
+
+/* Brand bits */
+.brand-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+}
+
+.brand-mark:hover {
+    color: var(--accent);
+}
+
+.brand-dot {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 9999px;
+    background: var(--accent);
+    box-shadow: 0 0 0 5px rgba(78, 78, 69, 0.12);
+}
+
+/* 06. Interactive Elements (Buttons, Forms, Alerts) */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--btn-gap);
+    border-radius: var(--btn-radius);
+    border: var(--btn-border-width) solid transparent;
+    padding: var(--btn-padding-y) var(--btn-padding-x);
+    font-size: var(--btn-font-size);
+    font-weight: var(--btn-font-weight);
+    line-height: var(--btn-line-height);
+    min-height: var(--btn-min-height);
+    box-shadow: var(--btn-shadow);
+    transition: transform 140ms ease, background-color 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--btn-shadow-hover);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:focus-visible,
+.input:focus-visible,
+.textarea:focus-visible,
+.select:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+.btn-primary {
+    background: var(--btn-primary-bg);
+    border-color: var(--btn-primary-border);
+    color: var(--btn-primary-text);
+}
+
+.btn-primary:hover {
+    background: var(--btn-primary-bg-hover);
+    border-color: var(--btn-primary-border-hover);
+}
+
+.btn-secondary {
+    background: var(--btn-secondary-bg);
+    border-color: var(--btn-secondary-border);
+    color: var(--btn-secondary-text);
+}
+
+.btn-secondary:hover {
+    border-color: var(--btn-secondary-border-hover);
+    background: var(--btn-secondary-bg-hover);
+}
+
+.btn-ghost {
+    background: var(--btn-ghost-bg);
+    border-color: var(--btn-ghost-border);
+    color: var(--btn-ghost-text);
+    box-shadow: none;
+}
+
+.btn-ghost:hover {
+    color: var(--btn-ghost-text-hover);
+    background: var(--btn-ghost-bg-hover);
+    box-shadow: none;
+}
+
+.btn-icon {
+    width: var(--btn-icon-size);
+    height: var(--btn-icon-size);
+    flex: 0 0 var(--btn-icon-size);
+}
+
+.btn-icon-only {
+    width: var(--btn-min-height);
+    min-width: var(--btn-min-height);
+    padding: 0;
+}
+
+.label {
+    display: inline-block;
+    margin-bottom: 0.35rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.input,
+.textarea,
+.select {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: #fff;
+    color: var(--ink);
+    padding: 0.62rem 0.8rem;
+    font: inherit;
+}
+
+.textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.help-text {
+    margin-top: 0.35rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+
+.alert {
+    border: 1px solid var(--line);
+    border-left-width: 4px;
+    border-radius: var(--radius-md);
+    background: #fff;
+    padding: 0.75rem 0.9rem;
+    font-size: 0.92rem;
+}
+
+.alert-info {
+    border-left-color: var(--info);
+    background: var(--alert-info-bg);
+    color: var(--alert-info-text);
+}
+
+.alert-success {
+    border-left-color: var(--success);
+    background: var(--alert-success-bg);
+    color: var(--alert-success-text);
+}
+
+.alert-warning {
+    border-left-color: var(--warning);
+    background: var(--alert-warning-bg);
+    color: var(--alert-warning-text);
+}
+
+.alert-danger {
+    border-left-color: var(--danger);
+    background: var(--alert-danger-bg);
+    color: var(--alert-danger-text);
+}

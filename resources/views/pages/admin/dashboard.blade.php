@@ -16,7 +16,7 @@
     <section class="admin-section" aria-label="Kennzahlen">
         <div class="admin-section-head">
             <h2 class="admin-section-title">Kennzahlen</h2>
-            <a href="#" class="btn btn-secondary">Report exportieren</a>
+            <a href="{{ route('admin.pages.index') }}" class="btn btn-secondary">Seiten verwalten</a>
         </div>
 
         <div class="admin-metrics">
@@ -87,14 +87,14 @@
         <h2 class="admin-section-title">Schnellaktionen</h2>
 
         <div class="admin-actions-row">
-            <a href="#" class="admin-action-item">
+            <a href="{{ route('admin.pages.create') }}" class="admin-action-item">
                 <x-heroicon-o-plus-circle class="admin-action-icon" aria-hidden="true" />
-                <span>Neuen Beitrag erstellen</span>
+                <span>Neue Seite erstellen</span>
             </a>
 
-            <a href="#" class="admin-action-item is-soft">
+            <a href="{{ route('admin.pages.index') }}" class="admin-action-item is-soft">
                 <x-heroicon-o-user-plus class="admin-action-icon" aria-hidden="true" />
-                <span>Benutzer einladen</span>
+                <span>Alle Seiten anzeigen</span>
             </a>
 
             <a href="#" class="admin-action-item is-soft">

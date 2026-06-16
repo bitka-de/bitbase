@@ -7,7 +7,7 @@
         <x-heroicon-o-cube class="admin-nav-icon" aria-hidden="true" />
         <span>Komponenten</span>
     </a>
-    <a href="#" class="admin-sidebar-link">
+    <a href="{{ route('admin.pages.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.pages.*') ? 'is-active' : '' }}">
         <x-heroicon-o-document-duplicate class="admin-nav-icon" aria-hidden="true" />
         <span>Seiten</span>
     </a>
