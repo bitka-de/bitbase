@@ -1687,6 +1687,7 @@ video {
     display: inline-flex;
     gap: 0.4rem;
     flex-wrap: wrap;
+}
 
 .cms-sticky-save .btn:disabled,
 .cms-sticky-save .btn.is-disabled {
@@ -1729,22 +1730,20 @@ video {
 
 .cms-revisions-split {
     display: grid;
-    grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
-    gap: 1rem;
+    grid-template-columns: minmax(280px, 332px) minmax(0, 1fr);
+    gap: 1.08rem;
     align-items: start;
     min-height: 560px;
 }
 
 .cms-revisions-sidebar {
     display: grid;
-    gap: 0.75rem;
-    padding: 1rem;
-    border-radius: 1.1rem;
-    border: 1px solid rgba(209, 220, 236, 0.72);
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(247, 250, 255, 0.88)),
-        radial-gradient(circle at 0% 0%, rgba(186, 214, 255, 0.26), transparent 34%);
-    box-shadow: 0 18px 40px rgba(15, 24, 40, 0.06);
+    gap: 0.7rem;
+    padding: 0.9rem;
+    border-radius: 0.95rem;
+    border: 1px solid rgba(207, 217, 232, 0.72);
+    background: #fbfcfe;
+    box-shadow: none;
 }
 
 .cms-revisions-sidebar-head {
@@ -1752,77 +1751,95 @@ video {
     align-items: flex-start;
     justify-content: space-between;
     gap: 0.8rem;
-    padding-bottom: 0.85rem;
-    border-bottom: 1px solid rgba(201, 214, 231, 0.68);
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid rgba(207, 217, 232, 0.72);
+}
+
+.cms-revisions-sidebar-actions {
+    display: grid;
+    justify-items: end;
+    gap: 0.45rem;
 }
 
 .cms-revisions-eyebrow {
     margin: 0 0 0.28rem;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
+    font-size: 0.67rem;
+    font-weight: 760;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: #8292a7;
+    color: #6d819a;
 }
 
 .cms-revisions-title {
     margin: 0;
-    font-size: 0.96rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    letter-spacing: -0.02em;
-    color: #223146;
+    letter-spacing: -0.01em;
+    color: #24374f;
 }
 
 .cms-revisions-counter {
     display: inline-grid;
     place-items: center;
-    min-width: 2.15rem;
-    height: 2.15rem;
+    min-width: 2rem;
+    height: 2rem;
     padding: 0 0.45rem;
-    border-radius: 0.8rem;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(235, 242, 252, 0.94));
-    border: 1px solid rgba(117, 141, 177, 0.2);
-    color: #365073;
-    font-size: 0.84rem;
-    font-weight: 720;
+    border-radius: 0.62rem;
+    background: #ffffff;
+    border: 1px solid rgba(150, 170, 197, 0.4);
+    color: #3a5374;
+    font-size: 0.8rem;
+    font-weight: 700;
+    box-shadow: none;
 }
 
-.cms-revisions-hint {
-    margin: 0;
-    font-size: 0.8rem;
-    color: #627289;
-    line-height: 1.55;
+.cms-revisions-prune-btn {
+    border: 1px solid rgba(185, 77, 77, 0.34);
+    background: #fff;
+    color: #8d2f2f;
+    border-radius: 999px;
+    padding: 0.18rem 0.52rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+
+.cms-revisions-prune-btn:hover {
+    background: #fff5f5;
+    border-color: rgba(185, 77, 77, 0.46);
+    transform: none;
 }
 
 .cms-revisions-list {
     display: grid;
-    gap: 0.55rem;
+    gap: 0.58rem;
+    position: relative;
+    padding-left: 0;
 }
 
 .cms-revision-card {
-    border-radius: 1rem;
-    border: 1px solid color-mix(in srgb, var(--line) 78%, #cfdbeb 22%);
-    background:
-        linear-gradient(160deg, rgba(255,255,255,0.97), rgba(246,250,255,0.92)),
-        radial-gradient(circle at 100% 0%, rgba(196, 221, 255, 0.16), transparent 28%);
+    border-radius: 0.9rem;
+    border: 1px solid rgba(209, 220, 235, 0.9);
+    background: #ffffff;
     overflow: hidden;
     position: relative;
     transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
-    box-shadow: 0 8px 18px rgba(15, 24, 40, 0.04);
+    box-shadow: none;
+    margin-left: 0;
 }
 
 .cms-revision-card:hover {
-    transform: translateY(-1px);
-    border-color: color-mix(in srgb, var(--accent) 32%, var(--line) 68%);
-    box-shadow: 0 16px 28px rgba(15, 24, 40, 0.09);
+    transform: none;
+    border-color: rgba(134, 160, 194, 0.62);
+    box-shadow: none;
 }
 
 .cms-revision-card.is-active {
-    border-color: rgba(105, 137, 184, 0.42);
-    background:
-        linear-gradient(160deg, rgba(255,255,255,1), rgba(241,247,255,0.98)),
-        radial-gradient(circle at 100% 0%, rgba(176, 206, 248, 0.24), transparent 30%);
-    box-shadow: 0 20px 34px rgba(15, 24, 40, 0.12);
+    border-color: rgba(84, 118, 163, 0.62);
+    background: #f7faff;
+    box-shadow: none;
 }
 
 .cms-revision-card.is-active::before {
@@ -1830,7 +1847,24 @@ video {
     position: absolute;
     inset: 0 auto 0 0;
     width: 4px;
-    background: linear-gradient(180deg, #6d88b8, #a5bddf);
+    background: #4b76b3;
+}
+
+.cms-revision-card-rail {
+    position: absolute;
+    width: 0.66rem;
+    height: 0.66rem;
+    border-radius: 999px;
+    background: #dfe8f5;
+    border: 1px solid rgba(131, 156, 189, 0.34);
+    left: -9999px;
+    top: 0.94rem;
+    box-shadow: none;
+}
+
+.cms-revision-card.is-active .cms-revision-card-rail {
+    background: #4b76b3;
+    border-color: rgba(60, 109, 177, 0.5);
 }
 
 .cms-revision-card-trigger {
@@ -1848,7 +1882,7 @@ video {
 
 .cms-revision-card-trigger:focus-visible {
     outline: none;
-    box-shadow: inset 0 0 0 2px rgba(93, 126, 190, 0.24);
+    box-shadow: inset 0 0 0 2px rgba(93, 126, 190, 0.18);
 }
 
 .cms-revision-card-head {
@@ -1856,7 +1890,7 @@ video {
     align-items: center;
     justify-content: space-between;
     gap: 0.55rem;
-    padding: 0.72rem 0.82rem 0.58rem;
+    padding: 0.7rem 0.8rem 0.54rem;
 }
 
 .cms-revision-card-meta {
@@ -1869,52 +1903,88 @@ video {
 
 .cms-revision-card-time {
     font-size: 0.75rem;
-    font-weight: 680;
-    color: #203147;
+    font-weight: 700;
+    color: #24374f;
+    white-space: nowrap;
+}
+
+.cms-revision-card-date {
+    font-size: 0.68rem;
+    color: #7c8fa6;
     white-space: nowrap;
 }
 
 .cms-revision-card-user {
     font-size: 0.72rem;
-    color: #72839a;
+    color: #6d8097;
     white-space: nowrap;
 }
 
-.cms-revision-card-preview-title {
+.cms-revision-card-open {
     display: block;
-    font-size: 0.84rem;
+    padding: 0.46rem 0.8rem;
+    border-top: 1px solid rgba(210, 222, 238, 0.76);
+    font-size: 0.69rem;
     font-weight: 700;
-    color: #2b3a50;
-    padding: 0.55rem 0.82rem 0.34rem;
-    border-top: 1px solid rgba(200, 216, 234, 0.48);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    letter-spacing: 0.06em;
+    color: #69809b;
+    text-transform: uppercase;
 }
 
-.cms-revision-card-preview {
-    display: block;
-    font-size: 0.75rem;
-    line-height: 1.55;
-    color: #6a7a8f;
-    padding: 0 0.82rem 0.82rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+.cms-revision-changes {
+    border-top: 1px solid rgba(210, 222, 238, 0.76);
+}
+
+.cms-revision-changes summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 0.44rem 0.8rem;
+    font-size: 0.69rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #69809b;
+    user-select: none;
+}
+
+.cms-revision-changes summary::-webkit-details-marker {
+    display: none;
+}
+
+.cms-revision-changes[open] summary {
+    background: rgba(247, 250, 254, 0.9);
+}
+
+.cms-revision-keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.34rem;
+    padding: 0 0.82rem 0.75rem;
+}
+
+.cms-mini-pill-subtle {
+    min-height: 1.5rem;
+    padding: 0.1rem 0.46rem;
+    background: rgba(244, 248, 254, 0.96);
+    border: 1px solid rgba(197, 212, 233, 0.72);
+    color: #5a6f89;
+    letter-spacing: 0.03em;
+    font-size: 0.68rem;
+}
+
+.cms-mini-pill-current {
+    background: rgba(66, 109, 172, 0.12);
+    color: #355e9a;
 }
 
 .cms-revisions-preview-panel {
-    border-radius: 1.15rem;
-    border: 1px solid color-mix(in srgb, var(--line) 76%, #cfdbeb 24%);
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(245, 249, 255, 0.95)),
-        radial-gradient(circle at 100% 0%, rgba(184, 214, 255, 0.18), transparent 34%);
+    border-radius: 0.95rem;
+    border: 1px solid rgba(207, 217, 232, 0.82);
+    background: #ffffff;
     overflow: hidden;
     min-height: 560px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 22px 48px rgba(15, 24, 40, 0.1);
+    box-shadow: none;
     position: relative;
 }
 
@@ -1925,7 +1995,7 @@ video {
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
-    color: #8a9ab5;
+    color: #768aa3;
     text-align: center;
     font-size: 0.84rem;
     line-height: 1.5;
@@ -1933,7 +2003,7 @@ video {
 }
 
 .cms-revisions-preview-empty svg {
-    opacity: 0.4;
+    opacity: 0.42;
 }
 
 .cms-revisions-preview-empty p {
@@ -1953,10 +2023,9 @@ video {
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    padding: 0.82rem 0.95rem;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 250, 255, 0.92));
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid rgba(200, 216, 234, 0.62);
+    padding: 0.74rem 0.88rem;
+    background: #fafcff;
+    border-bottom: 1px solid rgba(207, 217, 232, 0.72);
     flex-shrink: 0;
 }
 
@@ -1964,8 +2033,8 @@ video {
     display: grid;
     gap: 0.16rem;
     font-size: 0.76rem;
-    color: #3d5270;
-    font-weight: 600;
+    color: #355272;
+    font-weight: 680;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1973,11 +2042,15 @@ video {
 }
 
 .cms-revisions-preview-kicker {
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
+    font-size: 0.65rem;
+    font-weight: 760;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: #8a99ad;
+    color: #7a91ab;
+}
+
+.cms-revisions-preview-bar .btn[hidden] {
+    display: none;
 }
 
 .cms-revisions-preview-loading {
@@ -1989,19 +2062,18 @@ video {
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
-    background: linear-gradient(180deg, rgba(248, 251, 255, 0.76), rgba(244, 248, 255, 0.88));
-    backdrop-filter: blur(4px);
-    color: #58708f;
+    background: rgba(247, 250, 255, 0.88);
+    color: #4f6b8e;
     font-size: 0.82rem;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .cms-revisions-preview-spinner {
     width: 2rem;
     height: 2rem;
     border-radius: 999px;
-    border: 2px solid rgba(88, 112, 143, 0.18);
-    border-top-color: #6d88b8;
+    border: 2px solid rgba(99, 126, 161, 0.24);
+    border-top-color: #4b76b3;
 }
 
 .cms-revisions-preview-frame {
@@ -2010,7 +2082,7 @@ video {
     border: none;
     display: block;
     min-height: 500px;
-    background: #f6f8fc;
+    background: #f7f9fc;
     transition: opacity 180ms ease, transform 180ms ease;
 }
 
@@ -2031,7 +2103,22 @@ video {
     .cms-revisions-sidebar {
         padding: 0.7rem;
     }
-}
+
+    .cms-revisions-sidebar-actions {
+        justify-items: start;
+    }
+
+    .cms-revisions-list {
+        padding-left: 0;
+    }
+
+    .cms-revision-card {
+        margin-left: 0;
+    }
+
+    .cms-revision-card-rail {
+        left: -0.68rem;
+    }
 }
 
 .cms-actions-row form {

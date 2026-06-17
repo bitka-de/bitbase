@@ -437,22 +437,89 @@ $statusDisplay = $toDisplayString($value('status', 'draft'));
             <div class="cms-revisions-sidebar">
                 <div class="cms-revisions-sidebar-head">
                     <div>
-                        <p class="cms-revisions-eyebrow">Snapshots</p>
                         <h4 class="cms-revisions-title">Letzte {{ $revisions->count() }} Versionen</h4>
                     </div>
-                    <span class="cms-revisions-counter">{{ $revisions->count() }}</span>
+                    <div class="cms-revisions-sidebar-actions">
+                        <span class="cms-revisions-counter">{{ $revisions->count() }}</span>
+                        @if($revisions->count() > 1)
+                        <button
+                            type="button"
+                            class="cms-revisions-prune-btn"
+                            data-revisions-prune
+                            data-prune-url="{{ route('admin.pages.revisions.prune', ['page' => $page]) }}"
+                        >Alle ausser aktuelle</button>
+                        @endif
+                    </div>
                 </div>
-                <p class="help-text cms-revisions-hint">Klicke eine Version an, um rechts die komplette Vorschau zu laden und bei Bedarf direkt wiederherzustellen.</p>
-                <div class="cms-revisions-list">
-                    @foreach($revisions as $revisionLoop)
+                <div class="cms-revisions-list" role="list">
+                    @foreach($revisions as $revisionIndex => $revisionLoop)
                     @php
                         $rPayload     = is_array($revisionLoop->payload) ? $revisionLoop->payload : [];
                         $rTitle       = $rPayload['title'] ?? '—';
                         $rContent     = $rPayload['content'] ?? '';
                         $rExcerpt     = $rPayload['excerpt'] ?? '';
                         $rTemplate    = $rPayload['template'] ?? 'default';
+                        $rRelativeTime = $revisionLoop->created_at?->locale('de')->diffForHumans() ?? 'unbekannt';
+                        $rAbsoluteTime = $revisionLoop->created_at?->format('d.m.Y · H:i') ?? '—';
+                        $rCompareRevision = $revisions->get($revisionIndex + 1);
+                        $rComparePayload = is_array($rCompareRevision?->payload) ? $rCompareRevision->payload : [];
+                        $rChangeFieldLabels = [
+                            'title' => 'Titel',
+                            'h1' => 'H1',
+                            'slug' => 'Slug',
+                            'excerpt' => 'Einleitung',
+                            'content' => 'Inhalt',
+                            'template' => 'Template',
+                            'status' => 'Status',
+                            'seo_title' => 'SEO Titel',
+                            'meta_description' => 'Meta Description',
+                            'canonical_url' => 'Canonical URL',
+                            'sitemap_include' => 'Sitemap',
+                        ];
+                        $rChangeKeywords = [];
+
+                        foreach ($rChangeFieldLabels as $rField => $rLabel) {
+                            $rCurrentValue = $rPayload[$rField] ?? null;
+                            $rPreviousValue = $rComparePayload[$rField] ?? null;
+
+                            if (is_array($rCurrentValue)) {
+                                $rCurrentValue = json_encode($rCurrentValue);
+                            }
+
+                            if (is_array($rPreviousValue)) {
+                                $rPreviousValue = json_encode($rPreviousValue);
+                            }
+
+                            if (is_string($rCurrentValue)) {
+                                $rCurrentValue = trim($rCurrentValue);
+                            }
+
+                            if (is_string($rPreviousValue)) {
+                                $rPreviousValue = trim($rPreviousValue);
+                            }
+
+                            if ((string) $rCurrentValue !== (string) $rPreviousValue) {
+                                $rChangeKeywords[] = $rLabel;
+                            }
+                        }
+
+                        $rContentCurrentLength = mb_strlen(strip_tags((string) ($rPayload['content'] ?? '')));
+                        $rContentPreviousLength = mb_strlen(strip_tags((string) ($rComparePayload['content'] ?? '')));
+                        $rContentDelta = $rContentCurrentLength - $rContentPreviousLength;
+
+                        if ($rContentDelta > 0) {
+                            $rChangeKeywords[] = '+'.$rContentDelta.' Zeichen';
+                        } elseif ($rContentDelta < 0) {
+                            $rChangeKeywords[] = $rContentDelta.' Zeichen';
+                        }
+
+                        $rChangeKeywords = array_values(array_unique($rChangeKeywords));
+
+                        if (empty($rChangeKeywords)) {
+                            $rChangeKeywords = ['Kleine Anpassungen'];
+                        }
+
                         $rRestoreUrl  = route('admin.pages.revisions.restore', ['page' => $page]);
-                        $rPreviewText = \Illuminate\Support\Str::limit(strip_tags($rContent), 200);
                         $rPreviewData = [
                             'title' => $rTitle,
                             'content' => $rContent,
@@ -460,23 +527,34 @@ $statusDisplay = $toDisplayString($value('status', 'draft'));
                             'template' => $rTemplate,
                             'restoreUrl' => $rRestoreUrl,
                             'restoreId' => $revisionLoop->id,
-                            'label' => $revisionLoop->created_at?->format('d.m.Y · H:i') ?: $rTitle,
+                            'isCurrent' => $revisionIndex === 0,
+                            'label' => $rRelativeTime.' · '.$rAbsoluteTime,
                         ];
                     @endphp
-                    <article class="cms-revision-card" data-revision-card>
+                    <article class="cms-revision-card" data-revision-card role="listitem">
+                        <span class="cms-revision-card-rail" aria-hidden="true"></span>
                         <div class="cms-revision-card-head">
                             <div class="cms-revision-card-meta">
-                                <span class="cms-revision-card-time">{{ $revisionLoop->created_at?->format('d.m.Y · H:i') }}</span>
+                                <span class="cms-revision-card-time">{{ $rRelativeTime }}</span>
+                                <span class="cms-revision-card-date">{{ $rAbsoluteTime }}</span>
                                 <span class="cms-mini-pill">{{ strtoupper((string) $revisionLoop->change_type) }}</span>
+                                @if($revisionIndex === 0)
+                                    <span class="cms-mini-pill cms-mini-pill-current">AKTUELL</span>
+                                @endif
                             </div>
                             <span class="cms-revision-card-user">{{ $revisionLoop->user?->name ?? 'System' }}</span>
                         </div>
                         <button type="button" class="cms-revision-card-trigger" data-revision-trigger>
-                            <span class="cms-revision-card-preview-title">{{ $rTitle }}</span>
-                        @if($rPreviewText)
-                            <span class="cms-revision-card-preview">{{ $rPreviewText }}</span>
-                        @endif
+                            <span class="cms-revision-card-open">Ansehen</span>
                         </button>
+                        <details class="cms-revision-changes">
+                            <summary>Geaendert</summary>
+                            <div class="cms-revision-keywords">
+                                @foreach($rChangeKeywords as $rKeyword)
+                                    <span class="cms-mini-pill cms-mini-pill-subtle">{{ $rKeyword }}</span>
+                                @endforeach
+                            </div>
+                        </details>
                         <script type="application/json" data-revision-payload>@json($rPreviewData)</script>
                     </article>
                     @endforeach
@@ -487,12 +565,12 @@ $statusDisplay = $toDisplayString($value('status', 'draft'));
                     <svg viewBox="0 0 24 24" width="32" height="32" aria-hidden="true">
                         <path d="M12 8v4l3 3M12 3a9 9 0 1 0 0 18A9 9 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    <p>Version anklicken<br>um Vorschau zu laden</p>
+                    <p>Waehle links eine Version<br>fuer die Studio-Vorschau</p>
                 </div>
                 <div class="cms-revisions-preview-active" data-revision-preview-active hidden>
                     <div class="cms-revisions-preview-bar" data-revision-preview-bar>
                         <div class="cms-revisions-preview-bar-meta">
-                            <span class="cms-revisions-preview-kicker">Live Vorschau</span>
+                            <span class="cms-revisions-preview-kicker">Vorschau</span>
                             <span data-revision-preview-label></span>
                         </div>
                         <button

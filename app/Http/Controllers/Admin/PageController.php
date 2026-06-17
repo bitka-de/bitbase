@@ -120,6 +120,30 @@ class PageController extends Controller
             ->with('success', 'Version wurde erfolgreich wiederhergestellt.');
     }
 
+    public function pruneRevisions(Page $page): RedirectResponse
+    {
+        $revisionIds = $page->revisions()->pluck('id');
+
+        if ($revisionIds->count() <= 1) {
+            return redirect()
+                ->route('admin.pages.edit', $page)
+                ->with('success', 'Es gibt keine alten Versionen zum Entfernen.');
+        }
+
+        $revisionIdsToDelete = $revisionIds->slice(1)->values();
+        $deletedCount = $revisionIdsToDelete->count();
+
+        if ($deletedCount > 0) {
+            $page->revisions()
+                ->whereIn('id', $revisionIdsToDelete)
+                ->delete();
+        }
+
+        return redirect()
+            ->route('admin.pages.edit', $page)
+            ->with('success', $deletedCount.' alte Version(en) wurden entfernt.');
+    }
+
     public function update(UpdatePageRequest $request, Page $page): RedirectResponse
     {
         $data = $this->normalizePayload($request->validated());

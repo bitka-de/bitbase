@@ -18,6 +18,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('pages/{page}/revisions/restore', [PageController::class, 'restoreRevision'])
         ->name('pages.revisions.restore');
 
+    Route::post('pages/{page}/revisions/prune', [PageController::class, 'pruneRevisions'])
+        ->name('pages.revisions.prune');
+
     Route::resource('pages', PageController::class)->except(['show']);
 });
 

@@ -1229,6 +1229,21 @@ const submitRevisionRestore = (url, revisionId, csrfToken) => {
 	form.submit();
 };
 
+const submitRevisionPrune = (url, csrfToken) => {
+	const form = document.createElement('form');
+	form.method = 'POST';
+	form.action = url;
+
+	const csrfInput = document.createElement('input');
+	csrfInput.type = 'hidden';
+	csrfInput.name = '_token';
+	csrfInput.value = csrfToken;
+
+	form.append(csrfInput);
+	document.body.appendChild(form);
+	form.submit();
+};
+
 const initRevisionPreview = () => {
 	const cards = [...document.querySelectorAll('[data-revision-card]')];
 	if (!cards.length) {
@@ -1242,6 +1257,7 @@ const initRevisionPreview = () => {
 	const previewLoading = document.querySelector('[data-revision-preview-loading]');
 	const previewSpinner = document.querySelector('.cms-revisions-preview-spinner');
 	const restoreConfirmBtn = document.querySelector('[data-revision-restore-confirm]');
+	const pruneButton = document.querySelector('[data-revisions-prune]');
 	const formRoot = document.querySelector('[data-cms-form]');
 	const csrfToken = formRoot?.dataset?.csrf || '';
 	const frontendCss = formRoot?.dataset?.frontendCss || '';
@@ -1252,8 +1268,25 @@ const initRevisionPreview = () => {
 		return;
 	}
 
+	if (pruneButton instanceof HTMLButtonElement) {
+		pruneButton.addEventListener('click', () => {
+			const pruneUrl = pruneButton.dataset.pruneUrl || '';
+			if (!pruneUrl || !csrfToken) {
+				return;
+			}
+
+			const ok = window.confirm('Alle alten Versionen loeschen und nur die aktuelle behalten?');
+			if (!ok) {
+				return;
+			}
+
+			submitRevisionPrune(pruneUrl, csrfToken);
+		});
+	}
+
 	let activeRestoreUrl = '';
 	let activeRestoreId = '';
+	let activeRevisionIsCurrent = false;
 	let previewLoadToken = 0;
 	let spinnerAnimation = null;
 
@@ -1384,7 +1417,10 @@ body[data-page-template='story'] {
 
 		activeRestoreUrl = payload.restoreUrl || '';
 		activeRestoreId = String(payload.restoreId || '');
+		activeRevisionIsCurrent = Boolean(payload.isCurrent);
 		previewLabel.textContent = payload.label || payload.title || 'Version';
+		restoreConfirmBtn.hidden = activeRevisionIsCurrent;
+		restoreConfirmBtn.disabled = activeRevisionIsCurrent;
 
 		emptyPanel.hidden = true;
 		activePanel.hidden = false;
@@ -1410,7 +1446,7 @@ body[data-page-template='story'] {
 	});
 
 	restoreConfirmBtn.addEventListener('click', () => {
-		if (!activeRestoreUrl || !activeRestoreId) {
+		if (!activeRestoreUrl || !activeRestoreId || activeRevisionIsCurrent) {
 			return;
 		}
 
