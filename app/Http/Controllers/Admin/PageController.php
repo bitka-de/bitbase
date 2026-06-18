@@ -6,6 +6,7 @@ use App\Enums\PageStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StorePageRequest;
 use App\Http\Requests\Admin\UpdatePageRequest;
+use App\Models\ContentComponent;
 use App\Models\Page;
 use App\Models\PageRevision;
 use App\Services\SeoAuditService;
@@ -63,6 +64,7 @@ class PageController extends Controller
             'statuses' => PageStatus::cases(),
             'templates' => $this->templateOptions(),
             'starterData' => $starterData,
+            'contentComponents' => ContentComponent::query()->orderBy('title')->get(['id', 'name', 'title', 'description', 'tags', 'content', 'css', 'js']),
         ]);
     }
 
@@ -85,6 +87,7 @@ class PageController extends Controller
             'statuses' => PageStatus::cases(),
             'templates' => $this->templateOptions(),
             'audit' => $page->latestSeoAudit,
+            'contentComponents' => ContentComponent::query()->orderBy('title')->get(['id', 'name', 'title', 'description', 'tags', 'content', 'css', 'js']),
         ]);
     }
 

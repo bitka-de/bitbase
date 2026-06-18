@@ -3,7 +3,7 @@
         <x-heroicon-o-squares-2x2 class="admin-nav-icon" aria-hidden="true" />
         <span>Dashboard</span>
     </a>
-    <a href="#" class="admin-sidebar-link">
+    <a href="{{ route('admin.components.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.components.*') ? 'is-active' : '' }}">
         <x-heroicon-o-cube class="admin-nav-icon" aria-hidden="true" />
         <span>Komponenten</span>
     </a>

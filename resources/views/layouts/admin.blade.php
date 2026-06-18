@@ -19,16 +19,14 @@
             @include('partials.admin.sidebar-nav')
         </aside>
 
-        <div class="admin-main-wrap">
+        <main class="admin-content-wrap">
             @include('partials.admin.header', [
                 'title' => trim($__env->yieldContent('admin_title', 'Dashboard')),
                 'subtitle' => trim($__env->yieldContent('admin_subtitle', '')),
             ])
 
-            <main class="admin-content-wrap">
-                @yield('content')
-            </main>
-        </div>
+            @yield('content')
+        </main>
     </div>
 </body>
 </html>

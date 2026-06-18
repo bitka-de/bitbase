@@ -1,6 +1,8 @@
 import { EditorState } from '@codemirror/state';
 import { EditorView, basicSetup } from 'codemirror';
+import { css } from '@codemirror/lang-css';
 import { html } from '@codemirror/lang-html';
+import { javascript } from '@codemirror/lang-javascript';
 
 const initCmsEditor = () => {
 	const formRoot = document.querySelector('[data-cms-form]');
@@ -34,9 +36,6 @@ const initCmsEditor = () => {
 	const serpUrlEl = formRoot.querySelector('[data-serp-url]');
 	const serpDescEl = formRoot.querySelector('[data-serp-desc]');
 	const pageTitleEl = formRoot.querySelector('[data-cms-page-title]');
-	const editorWordsMetaEl = formRoot.querySelector('[data-editor-meta-words]');
-	const editorCharsMetaEl = formRoot.querySelector('[data-editor-meta-chars]');
-	const editorReadingMetaEl = formRoot.querySelector('[data-editor-meta-reading]');
 	const frontendCssHref = formRoot.dataset.frontendCss || '';
 	const appName = formRoot.dataset.appName || 'Website';
 	const previewYear = formRoot.dataset.previewYear || '';
@@ -82,6 +81,23 @@ const initCmsEditor = () => {
 			.replace(/-+/g, '-');
 	};
 
+	const handleEditableUndoShortcut = (event) => {
+		const isUndoShortcut = (event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey && event.key.toLowerCase() === 'z';
+
+		if (!isUndoShortcut) {
+			return false;
+		}
+
+		event.preventDefault();
+
+		const ownerDocument = event.currentTarget?.ownerDocument;
+		if (ownerDocument?.execCommand) {
+			ownerDocument.execCommand('undo');
+		}
+
+		return true;
+	};
+
 	let serpDevice = serpPreview?.dataset.serpDevice || 'desktop';
 
 	const truncateForSnippet = (value, maxLength) => {
@@ -123,7 +139,7 @@ const initCmsEditor = () => {
 		return ['default', 'focused', 'story'].includes(template) ? template : 'default';
 	};
 
-	const slashCommands = [
+	const baseSlashCommands = [
 		{
 			id: 'heading-1',
 			label: 'Heading 1 (H1)',
@@ -179,96 +195,6 @@ const initCmsEditor = () => {
 			},
 		},
 		{
-			id: 'section-faq',
-			label: 'Sektion FAQ',
-			keywords: ['faq', 'section', 'bereich', 'fragen', 'accordion'],
-			create: (doc) => {
-				const section = doc.createElement('section');
-				section.className = 'cms-content-section cms-content-section-faq';
-
-				const heading = doc.createElement('h2');
-				heading.textContent = 'Haeufige Fragen';
-				section.appendChild(heading);
-
-				const intro = doc.createElement('p');
-				intro.textContent = 'Hier findest du die wichtigsten Antworten kurz und klar zusammengefasst.';
-				section.appendChild(intro);
-
-				const list = doc.createElement('div');
-				list.className = 'cms-faq-list';
-
-				for (let i = 1; i <= 3; i += 1) {
-					const item = doc.createElement('details');
-					item.className = 'cms-faq-item';
-
-					const summary = doc.createElement('summary');
-					summary.textContent = `Frage ${i}`;
-
-					const answer = doc.createElement('p');
-					answer.textContent = 'Antworttext fuer diese Frage. Hier kannst du konkrete Details eintragen.';
-
-					item.append(summary, answer);
-					list.appendChild(item);
-				}
-
-				section.appendChild(list);
-				return section;
-			},
-		},
-		{
-			id: 'section-two-columns',
-			label: 'Sektion 2 Spalten',
-			keywords: ['section', 'bereich', '2 spalten', 'columns', 'layout'],
-			create: (doc) => {
-				const section = doc.createElement('section');
-				section.className = 'cms-content-section cms-content-section-columns';
-
-				const heading = doc.createElement('h2');
-				heading.textContent = 'Abschnitt mit zwei Spalten';
-				section.appendChild(heading);
-
-				const grid = doc.createElement('div');
-				grid.className = 'cms-columns';
-
-				const left = doc.createElement('div');
-				left.className = 'cms-column';
-				left.innerHTML = '<h3>Spalte 1</h3><p>Inhalt fuer die erste Spalte.</p>';
-
-				const right = doc.createElement('div');
-				right.className = 'cms-column';
-				right.innerHTML = '<h3>Spalte 2</h3><p>Inhalt fuer die zweite Spalte.</p>';
-
-				grid.append(left, right);
-				section.appendChild(grid);
-				return section;
-			},
-		},
-		{
-			id: 'section-cta',
-			label: 'Sektion CTA',
-			keywords: ['section', 'bereich', 'cta', 'call to action', 'button'],
-			create: (doc) => {
-				const section = doc.createElement('section');
-				section.className = 'cms-content-section cms-content-section-cta';
-
-				const heading = doc.createElement('h2');
-				heading.textContent = 'Bereit fuer den naechsten Schritt?';
-
-				const text = doc.createElement('p');
-				text.textContent = 'Kurzer CTA Text mit Nutzen und klarer Handlungsaufforderung.';
-
-				const buttonWrap = doc.createElement('p');
-				const link = doc.createElement('a');
-				link.href = '#';
-				link.className = 'btn btn-primary';
-				link.textContent = 'Jetzt starten';
-				buttonWrap.appendChild(link);
-
-				section.append(heading, text, buttonWrap);
-				return section;
-			},
-		},
-		{
 			id: 'quote',
 			label: 'Zitat',
 			keywords: ['zitat', 'quote', 'blockquote'],
@@ -278,21 +204,66 @@ const initCmsEditor = () => {
 				return node;
 			},
 		},
-		{
-			id: 'button',
-			label: 'Button Link',
-			keywords: ['button', 'cta', 'link'],
-			create: (doc) => {
-				const wrap = doc.createElement('p');
-				const link = doc.createElement('a');
-				link.href = '#';
-				link.className = 'btn btn-primary';
-				link.textContent = 'Jetzt starten';
-				wrap.appendChild(link);
-				return wrap;
-			},
-		},
 	];
+
+	const parseComponentSlashCommands = () => {
+		const payloadNode = formRoot.querySelector('[data-cms-components]');
+		if (!(payloadNode instanceof HTMLScriptElement)) {
+			return [];
+		}
+
+		try {
+			const payload = JSON.parse(payloadNode.textContent || '[]');
+			if (!Array.isArray(payload)) {
+				return [];
+			}
+
+			return payload
+				.filter((component) => component && typeof component.name === 'string' && typeof component.content === 'string')
+				.map((component) => {
+					const componentTags = Array.isArray(component.tags)
+						? component.tags.filter((tag) => typeof tag === 'string')
+						: [];
+
+					return {
+					id: `component-${component.id ?? component.name}`,
+					label: `/${component.name}`,
+					keywords: [component.name, component.title || '', component.description || '', ...componentTags, 'component', 'komponente'],
+					insertHtml: buildComponentInsertHtml(component),
+					};
+				});
+		} catch {
+			return [];
+		}
+	};
+
+	const buildComponentInsertHtml = (component) => {
+		const parts = [];
+		const componentName = typeof component.name === 'string' ? component.name : 'component';
+		const html = typeof component.content === 'string' ? component.content.trim() : '';
+		const css = typeof component.css === 'string' ? component.css.trim() : '';
+		const js = typeof component.js === 'string' ? component.js.trim() : '';
+
+		parts.push(`<!-- component:${componentName}:start -->`);
+
+		if (css) {
+			parts.push(`<style data-component-style="${componentName}">\n${css}\n</style>`);
+		}
+
+		if (html) {
+			parts.push(html);
+		}
+
+		if (js) {
+			parts.push(`<script data-component-script="${componentName}">\n${js}\n</script>`);
+		}
+
+		parts.push(`<!-- component:${componentName}:end -->`);
+
+		return parts.join('\n');
+	};
+
+	const slashCommands = [...baseSlashCommands, ...parseComponentSlashCommands()];
 
 	const setSerpDevice = (device) => {
 		if (!(serpPreview instanceof HTMLElement)) {
@@ -580,7 +551,6 @@ const initCmsEditor = () => {
 	let slugManuallyEdited = false;
 	let suppressWysiwygRefresh = false;
 	let fullscreenTransitionTimer;
-	let metricsFrame = null;
 	let editorViewport = window.sessionStorage.getItem(editorViewportStorageKey) || 'desktop';
 	let activeTemplate = normalizeTemplate(templateSelect instanceof HTMLSelectElement ? templateSelect.value : 'default');
 	let initialFormState = '';
@@ -722,11 +692,26 @@ const initCmsEditor = () => {
 		replaceRange.setEnd(currentRange.endContainer, currentRange.endOffset);
 		replaceRange.deleteContents();
 
-		const node = item.create(wysiwygDocument.doc);
-		replaceRange.insertNode(node);
+		let insertedNode;
+
+		if (typeof item.insertHtml === 'string') {
+			const fragment = replaceRange.createContextualFragment(item.insertHtml.trim() || '<p>Neue Komponente</p>');
+			const insertedNodes = Array.from(fragment.childNodes);
+			insertedNode = insertedNodes[insertedNodes.length - 1] || null;
+			replaceRange.insertNode(fragment);
+		} else {
+			insertedNode = item.create(wysiwygDocument.doc);
+			replaceRange.insertNode(insertedNode);
+		}
+
+		if (!insertedNode) {
+			syncFromWysiwyg();
+			closeSlashMenu();
+			return;
+		}
 
 		const caret = wysiwygDocument.doc.createRange();
-		caret.setStartAfter(node);
+		caret.setStartAfter(insertedNode);
 		caret.collapse(true);
 		selection.removeAllRanges();
 		selection.addRange(caret);
@@ -794,40 +779,6 @@ const initCmsEditor = () => {
 		saveButton.classList.toggle('is-disabled', !hasChanges);
 	};
 
-	const metricsBuffer = document.createElement('div');
-	const extractEditorText = (rawHtml) => {
-		metricsBuffer.innerHTML = rawHtml || '';
-		return (metricsBuffer.textContent || '')
-			.replace(/\s+/g, ' ')
-			.trim();
-	};
-
-	const updateEditorMetaNow = () => {
-		if (!(editorWordsMetaEl instanceof HTMLElement) || !(editorCharsMetaEl instanceof HTMLElement) || !(editorReadingMetaEl instanceof HTMLElement)) {
-			return;
-		}
-
-		const text = extractEditorText(source.value);
-		const words = text ? text.split(' ').length : 0;
-		const chars = text.length;
-		const readingMinutes = Math.max(1, Math.ceil(words / 220));
-
-		editorWordsMetaEl.textContent = `${words} Woerter`;
-		editorCharsMetaEl.textContent = `${chars} Zeichen`;
-		editorReadingMetaEl.textContent = `~${readingMinutes} min Lesezeit`;
-	};
-
-	const queueEditorMetaUpdate = () => {
-		if (metricsFrame !== null) {
-			return;
-		}
-
-		metricsFrame = window.requestAnimationFrame(() => {
-			metricsFrame = null;
-			updateEditorMetaNow();
-		});
-	};
-
 	const view = new EditorView({
 		state: EditorState.create({
 			doc: source.value || '',
@@ -849,7 +800,6 @@ const initCmsEditor = () => {
 					previewRoot.innerHTML = value;
 					syncPreviewShellMeta();
 					updateSaveButtonState();
-					queueEditorMetaUpdate();
 				}),
 			],
 		}),
@@ -868,7 +818,6 @@ const initCmsEditor = () => {
 		previewRoot.innerHTML = value;
 		syncPreviewShellMeta();
 		updateSaveButtonState();
-		queueEditorMetaUpdate();
 	};
 
 	const syncFromWysiwyg = () => {
@@ -885,7 +834,6 @@ const initCmsEditor = () => {
 		previewRoot.innerHTML = value;
 		syncPreviewShellMeta();
 		updateSaveButtonState();
-		queueEditorMetaUpdate();
 	};
 
 	const setMode = (mode) => {
@@ -1007,6 +955,7 @@ const initCmsEditor = () => {
 	wysiwygEditable.addEventListener('input', syncFromWysiwyg);
 	wysiwygEditable.addEventListener('input', updateSlashFromSelection);
 	wysiwygEditable.addEventListener('focus', ensureParagraphMode);
+	wysiwygEditable.addEventListener('keydown', handleEditableUndoShortcut);
 	wysiwygEditable.addEventListener('keydown', (event) => {
 		if (event.key !== 'Enter' || event.shiftKey || event.metaKey || event.ctrlKey || event.altKey) {
 			return;
@@ -1199,7 +1148,6 @@ const initCmsEditor = () => {
 	ensureParagraphMode();
 	applyTemplateToFrames(activeTemplate);
 	setEditorViewport(editorViewport);
-	updateEditorMetaNow();
 	initialFormState = serializeFormState();
 	updateSaveButtonState();
 
@@ -1208,6 +1156,286 @@ const initCmsEditor = () => {
 };
 
 document.addEventListener('DOMContentLoaded', initCmsEditor);
+
+const initComponentEditor = () => {
+	const formRoot = document.querySelector('[data-component-form]');
+	if (!formRoot) {
+		return;
+	}
+
+	const cmsForm = formRoot.closest('form');
+	const saveButton = cmsForm?.querySelector('[data-save-button]');
+	const titleInput = formRoot.querySelector('#title');
+	const nameInput = formRoot.querySelector('#name');
+	const htmlSource = formRoot.querySelector('#component-html-source');
+	const cssSource = formRoot.querySelector('#component-css-source');
+	const jsSource = formRoot.querySelector('#component-js-source');
+	const htmlHost = formRoot.querySelector('#component-html-editor');
+	const cssHost = formRoot.querySelector('#component-css-editor');
+	const jsHost = formRoot.querySelector('#component-js-editor');
+	const wysiwygFrame = formRoot.querySelector('#component-wysiwyg');
+	const modeButtons = [...formRoot.querySelectorAll('[data-component-mode]')];
+	const fullscreenButton = formRoot.querySelector('[data-component-fullscreen]');
+	const editorSurface = formRoot.querySelector('[data-component-editor-surface]');
+	const frontendCssHref = formRoot.dataset.frontendCss || '';
+	const modeStorageKey = `component-editor-mode:${window.location.pathname}`;
+
+	if (
+		!(htmlSource instanceof HTMLTextAreaElement) ||
+		!(cssSource instanceof HTMLTextAreaElement) ||
+		!(jsSource instanceof HTMLTextAreaElement) ||
+		!(htmlHost instanceof HTMLElement) ||
+		!(cssHost instanceof HTMLElement) ||
+		!(jsHost instanceof HTMLElement) ||
+		!(wysiwygFrame instanceof HTMLIFrameElement)
+	) {
+		return;
+	}
+
+	const htmlView = new EditorView({
+		state: EditorState.create({
+			doc: htmlSource.value || '',
+			extensions: [
+				basicSetup,
+				html(),
+				EditorView.updateListener.of((update) => {
+					if (!update.docChanged) {
+						return;
+					}
+
+					htmlSource.value = update.state.doc.toString();
+					updateSaveButtonState();
+					if (!syncingFromWysiwyg) {
+						renderLivePreview();
+					}
+				}),
+			],
+		}),
+		parent: htmlHost,
+	});
+
+	const cssView = new EditorView({
+		state: EditorState.create({
+			doc: cssSource.value || '',
+			extensions: [
+				basicSetup,
+				css(),
+				EditorView.updateListener.of((update) => {
+					if (!update.docChanged) {
+						return;
+					}
+
+					cssSource.value = update.state.doc.toString();
+					updateSaveButtonState();
+					renderLivePreview();
+				}),
+			],
+		}),
+		parent: cssHost,
+	});
+
+	const jsView = new EditorView({
+		state: EditorState.create({
+			doc: jsSource.value || '',
+			extensions: [
+				basicSetup,
+				javascript(),
+				EditorView.updateListener.of((update) => {
+					if (!update.docChanged) {
+						return;
+					}
+
+					jsSource.value = update.state.doc.toString();
+					updateSaveButtonState();
+					renderLivePreview();
+				}),
+			],
+		}),
+		parent: jsHost,
+	});
+
+	let initialFormState = '';
+	let syncingFromWysiwyg = false;
+
+	const serializeFormState = () => {
+		if (!(cmsForm instanceof HTMLFormElement)) {
+			return '';
+		}
+
+		const formData = new FormData(cmsForm);
+		return JSON.stringify(Array.from(formData.entries()));
+	};
+
+	const updateSaveButtonState = () => {
+		if (!(saveButton instanceof HTMLButtonElement)) {
+			return;
+		}
+
+		const hasChanges = serializeFormState() !== initialFormState;
+		saveButton.disabled = !hasChanges;
+		saveButton.classList.toggle('is-disabled', !hasChanges);
+	};
+
+	const renderLivePreview = () => {
+		const doc = wysiwygFrame.contentDocument;
+		if (!doc) {
+			return;
+		}
+
+		const componentTitle = titleInput instanceof HTMLInputElement ? titleInput.value.trim() : 'Komponente';
+		const html = htmlSource.value || '';
+		const css = cssSource.value || '';
+		const js = jsSource.value || '';
+
+		doc.open();
+		doc.write(`<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="${frontendCssHref}">
+  <style>
+    body { margin: 0; background: #f6f8fc; color: #0f172a; }
+    .component-live-shell { min-height: 100vh; padding: 1rem; }
+    .component-live-card { width: min(100%, 1080px); margin: 0 auto; background: #fff; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 1rem; padding: 1rem; }
+    .component-live-title { margin: 0 0 0.8rem; font-size: 1rem; color: #334155; }
+    ${css}
+  </style>
+</head>
+<body>
+  <main class="component-live-shell">
+    <section class="component-live-card">
+      <h1 class="component-live-title">${componentTitle || 'Komponente'}</h1>
+			<div class="component-live-content" contenteditable="true" spellcheck="false">${html}</div>
+    </section>
+  </main>
+  <script>
+    try {
+${js}
+    } catch (error) {
+      console.error('Component JS error', error);
+    }
+  <\/script>
+</body>
+</html>`);
+		doc.close();
+
+		const liveContent = doc.querySelector('.component-live-content');
+		if (liveContent instanceof HTMLElement) {
+			liveContent.addEventListener('keydown', handleEditableUndoShortcut);
+			liveContent.addEventListener('input', () => {
+				const nextHtml = liveContent.innerHTML;
+				htmlSource.value = nextHtml;
+
+				const current = htmlView.state.doc.toString();
+				if (nextHtml !== current) {
+					syncingFromWysiwyg = true;
+					htmlView.dispatch({
+						changes: { from: 0, to: current.length, insert: nextHtml },
+					});
+					syncingFromWysiwyg = false;
+				}
+
+				updateSaveButtonState();
+			});
+		}
+	};
+
+	const setMode = (mode) => {
+		const nextMode = ['html', 'css', 'js', 'wysiwyg'].includes(mode) ? mode : 'html';
+		formRoot.dataset.componentMode = nextMode;
+		window.sessionStorage.setItem(modeStorageKey, nextMode);
+
+		modeButtons.forEach((button) => {
+			const active = button.dataset.componentMode === nextMode;
+			button.classList.toggle('is-active', active);
+			button.setAttribute('aria-selected', active ? 'true' : 'false');
+		});
+
+		htmlHost.hidden = nextMode !== 'html';
+		cssHost.hidden = nextMode !== 'css';
+		jsHost.hidden = nextMode !== 'js';
+		wysiwygFrame.hidden = nextMode !== 'wysiwyg';
+
+		if (nextMode === 'html') {
+			htmlView.requestMeasure();
+		}
+
+		if (nextMode === 'css') {
+			cssView.requestMeasure();
+		}
+
+		if (nextMode === 'js') {
+			jsView.requestMeasure();
+		}
+
+		if (nextMode === 'wysiwyg') {
+			renderLivePreview();
+		}
+	};
+
+	const setFullscreen = (enabled) => {
+		if (!(editorSurface instanceof HTMLElement) || !(fullscreenButton instanceof HTMLElement)) {
+			return;
+		}
+
+		editorSurface.classList.toggle('is-fullscreen', enabled);
+		fullscreenButton.classList.toggle('is-active', enabled);
+		fullscreenButton.dataset.componentFullscreen = enabled ? 'true' : 'false';
+		document.body.classList.toggle('cms-editor-fullscreen', enabled);
+	};
+
+	if (nameInput instanceof HTMLInputElement) {
+		nameInput.addEventListener('input', updateSaveButtonState);
+	}
+
+	if (titleInput instanceof HTMLInputElement) {
+		titleInput.addEventListener('input', () => {
+			updateSaveButtonState();
+			renderLivePreview();
+		});
+	}
+
+	modeButtons.forEach((button) => {
+		button.addEventListener('click', () => setMode(button.dataset.componentMode || 'html'));
+	});
+
+	if (fullscreenButton instanceof HTMLElement) {
+		fullscreenButton.addEventListener('click', () => {
+			const active = fullscreenButton.dataset.componentFullscreen === 'true';
+			setFullscreen(!active);
+		});
+	}
+
+	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Escape') {
+			setFullscreen(false);
+		}
+	});
+
+	cmsForm?.addEventListener('input', updateSaveButtonState);
+	cmsForm?.addEventListener('change', updateSaveButtonState);
+
+	cmsForm?.addEventListener('submit', () => {
+		if (saveButton instanceof HTMLButtonElement) {
+			saveButton.disabled = true;
+			saveButton.classList.add('is-disabled');
+		}
+	});
+
+	initialFormState = serializeFormState();
+	updateSaveButtonState();
+	renderLivePreview();
+
+	const storedMode = window.sessionStorage.getItem(modeStorageKey);
+	setMode(storedMode || 'html');
+
+	void htmlView;
+	void cssView;
+	void jsView;
+};
+
+document.addEventListener('DOMContentLoaded', initComponentEditor);
 
 const submitRevisionRestore = (url, revisionId, csrfToken) => {
 	const form = document.createElement('form');

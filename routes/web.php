@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ContentComponentController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\PageShowController;
 use App\Http\Controllers\RobotsController;
@@ -21,6 +22,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('pages/{page}/revisions/prune', [PageController::class, 'pruneRevisions'])
         ->name('pages.revisions.prune');
 
+    Route::get('components-export', [ContentComponentController::class, 'export'])
+        ->name('components.export');
+    Route::post('components-export-zip', [ContentComponentController::class, 'exportZip'])
+        ->name('components.export-zip');
+    Route::post('components-import', [ContentComponentController::class, 'import'])
+        ->name('components.import');
+
+    Route::resource('components', ContentComponentController::class)->except(['show']);
     Route::resource('pages', PageController::class)->except(['show']);
 });
 

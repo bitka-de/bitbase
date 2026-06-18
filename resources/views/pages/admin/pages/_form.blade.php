@@ -41,6 +41,8 @@ $statusDisplay = $toDisplayString($value('status', 'draft'));
     data-preview-year="{{ now()->format('Y') }}"
     data-csrf="{{ csrf_token() }}"
 >
+    <script type="application/json" data-cms-components>@json(($contentComponents ?? collect())->values())</script>
+
     <div class="cms-page-headline cms-page-headline-compact">
         <div>
             <h2 class="cms-page-title" data-cms-page-title>{{ $value('title', 'Neue Seite') }}</h2>
@@ -118,12 +120,6 @@ $statusDisplay = $toDisplayString($value('status', 'draft'));
             <div class="cms-editor-head">
                 <div class="cms-editor-title-group">
                     <label for="content-source" class="label">Inhalt</label>
-                    <div class="cms-editor-meta" aria-live="polite">
-                        <span class="cms-editor-meta-chip" data-editor-meta-words>0 Woerter</span>
-                        <span class="cms-editor-meta-chip" data-editor-meta-chars>0 Zeichen</span>
-                        <span class="cms-editor-meta-chip" data-editor-meta-reading>~1 min Lesezeit</span>
-                        <span class="cms-editor-meta-chip is-hint">/ fuer Bausteine</span>
-                    </div>
                 </div>
                 <div class="cms-editor-controls">
                     <div class="cms-editor-switch" role="tablist" aria-label="Editor Modus">

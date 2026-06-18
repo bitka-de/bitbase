@@ -490,32 +490,6 @@
     min-width: 0;
 }
 
-.cms-editor-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.32rem;
-}
-
-.cms-editor-meta-chip {
-    display: inline-flex;
-    align-items: center;
-    min-height: 1.35rem;
-    padding: 0.12rem 0.5rem;
-    border-radius: 999px;
-    font-size: 0.72rem;
-    font-weight: 620;
-    letter-spacing: 0.02em;
-    color: #2d3a4f;
-    background: rgba(247, 251, 255, 0.9);
-    border: 1px solid rgba(55, 79, 114, 0.14);
-}
-
-.cms-editor-meta-chip.is-hint {
-    color: #54627a;
-    background: rgba(242, 246, 251, 0.85);
-    border-color: rgba(84, 98, 122, 0.2);
-}
-
 .cms-editor-surface {
     display: grid;
     gap: 0.32rem;
