@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StorePageRequest;
 use App\Http\Requests\Admin\UpdatePageRequest;
 use App\Models\ContentComponent;
+use App\Models\Media;
 use App\Models\Page;
 use App\Models\PageRevision;
 use App\Services\SeoAuditService;
@@ -65,6 +66,7 @@ class PageController extends Controller
             'templates' => $this->templateOptions(),
             'starterData' => $starterData,
             'contentComponents' => ContentComponent::query()->orderBy('title')->get(['id', 'name', 'title', 'description', 'tags', 'content', 'css', 'js']),
+            'mediaLibrary' => $this->mediaLibraryItems(),
         ]);
     }
 
@@ -88,6 +90,7 @@ class PageController extends Controller
             'templates' => $this->templateOptions(),
             'audit' => $page->latestSeoAudit,
             'contentComponents' => ContentComponent::query()->orderBy('title')->get(['id', 'name', 'title', 'description', 'tags', 'content', 'css', 'js']),
+            'mediaLibrary' => $this->mediaLibraryItems(),
         ]);
     }
 
@@ -198,5 +201,30 @@ class PageController extends Controller
         }
 
         return $validated;
+    }
+
+    private function mediaLibraryItems()
+    {
+        return Media::query()
+            ->latest()
+            ->get()
+            ->map(function (Media $media): array {
+                $xsPath = data_get($media->variants, 'xs.path');
+
+                return [
+                    'id' => $media->id,
+                    'name' => $media->name ?: pathinfo(basename($media->path), PATHINFO_FILENAME),
+                    'filename' => basename($media->path),
+                    'alt_text' => $media->alt_text,
+                    'source' => $media->source,
+                    'url' => $media->url,
+                    'preview_url' => is_string($xsPath) && $xsPath !== ''
+                        ? route('media.show', ['filename' => basename($xsPath)])
+                        : $media->url,
+                    'width' => $media->width,
+                    'height' => $media->height,
+                ];
+            })
+            ->values();
     }
 }

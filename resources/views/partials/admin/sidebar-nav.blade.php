@@ -11,7 +11,7 @@
         <x-heroicon-o-document-duplicate class="admin-nav-icon" aria-hidden="true" />
         <span>Seiten</span>
     </a>
-    <a href="#" class="admin-sidebar-link">
+    <a href="{{ route('admin.media.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.media.*') ? 'is-active' : '' }}">
         <x-heroicon-o-photo class="admin-nav-icon" aria-hidden="true" />
         <span>Medien</span>
     </a>

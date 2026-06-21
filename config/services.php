@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'unsplash' => [
+        'access_key' => env('UNSPLASH_ACCESS_KEY'),
+        'app_name' => env('UNSPLASH_APP_NAME', env('APP_NAME', 'Laravel')),
+    ],
+
 ];

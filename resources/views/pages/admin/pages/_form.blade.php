@@ -39,9 +39,13 @@ $statusDisplay = $toDisplayString($value('status', 'draft'));
     data-frontend-css="{{ Vite::asset('resources/css/public.css') }}"
     data-app-name="{{ config('app.name') }}"
     data-preview-year="{{ now()->format('Y') }}"
+    data-external-media-search-url="{{ route('admin.media.external.search') }}"
+    data-external-media-import-url="{{ route('admin.media.external.import') }}"
+    data-media-upload-url="{{ route('admin.media.store') }}"
     data-csrf="{{ csrf_token() }}"
 >
     <script type="application/json" data-cms-components>@json(($contentComponents ?? collect())->values())</script>
+    <script type="application/json" data-cms-media-library>@json(($mediaLibrary ?? collect())->values())</script>
 
     <div class="cms-page-headline cms-page-headline-compact">
         <div>
@@ -191,6 +195,137 @@ $statusDisplay = $toDisplayString($value('status', 'draft'));
             @enderror
         </div>
     </section>
+
+    <div class="cms-media-picker" data-cms-media-modal hidden aria-hidden="true">
+        <div class="cms-media-picker-backdrop" data-cms-media-close></div>
+        <div class="cms-media-picker-dialog" role="dialog" aria-modal="true" aria-labelledby="cms-media-picker-title">
+
+            <div class="cms-media-picker-head">
+                <div class="cms-media-picker-head-current">
+                    <div class="cms-media-picker-head-thumb" aria-hidden="true">
+                        <img data-cms-media-current-preview hidden alt="">
+                        <span data-cms-media-current-fallback></span>
+                    </div>
+                    <div class="cms-media-picker-head-text">
+                        <h3 id="cms-media-picker-title" class="cms-media-picker-title">Bild ersetzen</h3>
+                        <p class="cms-media-picker-current-src" data-cms-media-current-meta>Kein Bild ausgewaehlt</p>
+                    </div>
+                </div>
+                <button type="button" class="cms-media-picker-close" data-cms-media-close aria-label="Schliessen">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16"><path d="M18 6 6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+
+            <div class="cms-media-picker-tabs" role="tablist" aria-label="Bildquelle">
+                <button type="button" class="cms-media-picker-tab is-active" role="tab" aria-selected="true" data-cms-media-tab="library">Medienbibliothek</button>
+                <button type="button" class="cms-media-picker-tab" role="tab" aria-selected="false" data-cms-media-tab="upload">Upload</button>
+                <button type="button" class="cms-media-picker-tab" role="tab" aria-selected="false" data-cms-media-tab="external">Externes Bild</button>
+            </div>
+
+            <div class="cms-media-picker-panel" data-cms-media-panel="library" role="tabpanel">
+                <div class="cms-media-picker-toolbar">
+                    <label for="cms-media-search" class="sr-only">Medien suchen</label>
+                    <input id="cms-media-search" type="search" class="input cms-media-picker-search" data-cms-media-search placeholder="Suche nach Name, Alt-Text, Dateiname …">
+                    <span class="cms-media-picker-count" data-cms-media-count>0 Medien</span>
+                </div>
+                <div class="cms-media-picker-grid" data-cms-media-grid></div>
+                <p class="cms-media-picker-empty" data-cms-media-empty hidden>Keine Medien fuer diese Suche gefunden.</p>
+            </div>
+
+            <div class="cms-media-picker-panel" data-cms-media-panel="upload" role="tabpanel" hidden>
+                <form class="cms-media-picker-upload-form" data-cms-media-upload-form>
+                    <div class="cms-media-picker-upload-card">
+                        <div class="cms-media-picker-upload-copy">
+                            <strong>Neues Bild direkt im Popup hochladen</strong>
+                            <span>Nach dem Upload wird das Medium automatisch optimiert, in die Bibliothek aufgenommen und auf Wunsch direkt ersetzt.</span>
+                        </div>
+
+                        <label class="cms-media-picker-field cms-media-picker-upload-dropzone">
+                            <span>Datei <abbr title="Pflichtfeld">*</abbr></span>
+                            <input type="file" class="input" data-cms-media-upload-file accept="image/*" required>
+                            <small>Unterstuetzt alle gaengigen Bildformate, Ausgabe immer als WebP.</small>
+                        </label>
+
+                        <div class="cms-media-picker-upload-grid">
+                            <label class="cms-media-picker-field">
+                                <span>Dateiname</span>
+                                <input type="text" class="input" data-cms-media-upload-name maxlength="255" placeholder="Leer = automatisch erzeugt">
+                            </label>
+                            <label class="cms-media-picker-field">
+                                <span>Quelle</span>
+                                <input type="text" class="input" data-cms-media-upload-source maxlength="255" placeholder="z.B. Studio / Fotograf">
+                            </label>
+                        </div>
+
+                        <label class="cms-media-picker-field">
+                            <span>Alt-Text</span>
+                            <input type="text" class="input" data-cms-media-upload-alt maxlength="255" placeholder="Beschreibt den Bildinhalt fuer SEO und Accessibility">
+                        </label>
+
+                        <div class="cms-media-picker-upload-actions">
+                            <p class="cms-media-picker-upload-status" data-cms-media-upload-status>Bild auswaehlen und direkt in die Bibliothek legen.</p>
+                            <button type="submit" class="btn" data-cms-media-upload-submit>Upload starten</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="cms-media-picker-panel" data-cms-media-panel="external" role="tabpanel" hidden>
+                <div class="cms-media-picker-external-form">
+                    <div class="cms-media-picker-external-search">
+                        <div class="cms-media-picker-field-row">
+                            <label class="cms-media-picker-field">
+                                <span>Quelle</span>
+                                <select class="select" data-cms-media-external-provider>
+                                    <option value="openverse">Openverse</option>
+                                    <option value="wikimedia">Wikimedia Commons</option>
+                                    <option value="unsplash">Unsplash</option>
+                                </select>
+                            </label>
+                            <label class="cms-media-picker-field">
+                                <span>Kostenlose Bildsuche</span>
+                                <input type="search" class="input" data-cms-media-external-search placeholder="z.B. Business, Natur, Team ...">
+                            </label>
+                        </div>
+                        <span class="cms-media-picker-external-status" data-cms-media-external-status>Tippe im Suchfeld, um kostenlose Bilder aus Openverse zu laden.</span>
+                        <div class="cms-media-picker-external-grid" data-cms-media-external-grid></div>
+                        <p class="cms-media-picker-empty" data-cms-media-external-empty hidden>Keine externen Bilder gefunden.</p>
+                    </div>
+
+                    <div class="cms-media-picker-external-preview">
+                        <div class="cms-media-picker-external-preview-frame" aria-hidden="true">
+                            <img data-cms-media-external-preview hidden alt="">
+                            <span data-cms-media-external-preview-fallback>Vorschau</span>
+                        </div>
+                        <div class="cms-media-picker-external-preview-meta">
+                            <strong>Live-Vorschau</strong>
+                            <span data-cms-media-external-preview-text>Gib eine Bild-URL ein, um die Vorschau zu sehen.</span>
+                        </div>
+                    </div>
+                    <label class="cms-media-picker-field">
+                        <span>Bild-URL <abbr title="Pflichtfeld">*</abbr></span>
+                        <input type="url" class="input" data-cms-media-external-url placeholder="https://example.com/bild.jpg">
+                    </label>
+                    <label class="cms-media-picker-field">
+                        <span>Alt-Text</span>
+                        <input type="text" class="input" data-cms-media-external-alt placeholder="Bildinhalt beschreiben (empfohlen)">
+                    </label>
+                    <div class="cms-media-picker-field-row">
+                        <label class="cms-media-picker-field">
+                            <span>Breite (px)</span>
+                            <input type="number" min="1" class="input" data-cms-media-external-width placeholder="optional">
+                        </label>
+                        <label class="cms-media-picker-field">
+                            <span>Hoehe (px)</span>
+                            <input type="number" min="1" class="input" data-cms-media-external-height placeholder="optional">
+                        </label>
+                    </div>
+                    <button type="button" class="btn" data-cms-media-apply-external>Bild uebernehmen</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
 
     <section class="cms-pane" data-cms-tab-pane="seo" hidden>
         <div class="cms-pane-head">
